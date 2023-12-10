@@ -13,8 +13,9 @@ def generate_car_matrix(df)->pd.DataFrame:
                           where 'id_1' and 'id_2' are used as indices and columns respectively.
     """
     # Write your logic here
-
-    return df
+    matrix = df.pivot(index='id_1', columns='id_2', values='car').fillna(0)
+    return matrix
+   
 
 
 def get_type_count(df)->dict:
@@ -28,8 +29,9 @@ def get_type_count(df)->dict:
         dict: A dictionary with car types as keys and their counts as values.
     """
     # Write your logic here
+    type_counts = df['car'].value_counts().to_dict()
+    return type_counts
 
-    return dict()
 
 
 def get_bus_indexes(df)->list:
@@ -43,8 +45,11 @@ def get_bus_indexes(df)->list:
         list: List of indexes where 'bus' values exceed twice the mean.
     """
     # Write your logic here
+    bus_indexes = df[df['car'] == 'bus'].index[df['car'] == 'bus'].tolist()
+    mean_bus = df[df['car'] == 'bus']['value'].mean()
+    bus_indexes_twice_mean = [index for index in bus_indexes if df.at[index, 'value'] > 2 * mean_bus]
+    return bus_indexes_twice_mean
 
-    return list()
 
 
 def filter_routes(df)->list:
@@ -57,9 +62,10 @@ def filter_routes(df)->list:
     Returns:
         list: List of route names with average 'truck' values greater than 7.
     """
-    # Write your logic here
+    avg_truck_values = df.groupby('route')['car'].mean()
+    routes_greater_than_7 = avg_truck_values[avg_truck_values > 7].index.tolist()
+    return routes_greater_than_7
 
-    return list()
 
 
 def multiply_matrix(matrix)->pd.DataFrame:
@@ -73,20 +79,5 @@ def multiply_matrix(matrix)->pd.DataFrame:
         pandas.DataFrame: Modified matrix with values multiplied based on custom conditions.
     """
     # Write your logic here
-
+    matrix[matrix > 5] *= 2
     return matrix
-
-
-def time_check(df)->pd.Series:
-    """
-    Use shared dataset-2 to verify the completeness of the data by checking whether the timestamps for each unique (`id`, `id_2`) pair cover a full 24-hour and 7 days period
-
-    Args:
-        df (pandas.DataFrame)
-
-    Returns:
-        pd.Series: return a boolean series
-    """
-    # Write your logic here
-
-    return pd.Series()

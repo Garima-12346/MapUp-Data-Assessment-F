@@ -12,8 +12,8 @@ def calculate_distance_matrix(df)->pd.DataFrame():
         pandas.DataFrame: Distance matrix
     """
     # Write your logic here
-
-    return df
+    distance_matrix = df.pivot(index='id_start', columns='id_end', values='distance').fillna(0)
+    return distance_matrix
 
 
 def unroll_distance_matrix(df)->pd.DataFrame():
@@ -27,8 +27,10 @@ def unroll_distance_matrix(df)->pd.DataFrame():
         pandas.DataFrame: Unrolled DataFrame containing columns 'id_start', 'id_end', and 'distance'.
     """
     # Write your logic here
+    unrolled_df = df.unstack().reset_index()
+    unrolled_df.columns = ['id_start', 'id_end', 'distance']
+    return unrolled_df
 
-    return df
 
 
 def find_ids_within_ten_percentage_threshold(df, reference_id)->pd.DataFrame():
@@ -44,8 +46,11 @@ def find_ids_within_ten_percentage_threshold(df, reference_id)->pd.DataFrame():
                           of the reference ID's average distance.
     """
     # Write your logic here
-
-    return df
+    reference_distance = df[df['id_start'] == reference_id]['distance'].mean()
+    threshold = 0.1 * reference_distance
+    filtered_df = df.groupby('id_start')['distance'].mean().reset_index()
+    result_df = filtered_df[abs(filtered_df['distance'] - reference_distance) <= threshold]
+    return result_df
 
 
 def calculate_toll_rate(df)->pd.DataFrame():
@@ -59,11 +64,14 @@ def calculate_toll_rate(df)->pd.DataFrame():
         pandas.DataFrame
     """
     # Wrie your logic here
-
+    toll_rates = df.groupby('vehicle_type')['distance'].mean() * 0.1  # Adjust the toll rate calculation as needed
+    df['toll_rate'] = df['vehicle_type'].map(toll_rates)
     return df
 
+    
 
-def calculate_time_based_toll_rates(df)->pd.DataFrame():
+
+def calculate_time_based_toll_rates(df):
     """
     Calculate time-based toll rates for different time intervals within a day.
 
@@ -73,6 +81,10 @@ def calculate_time_based_toll_rates(df)->pd.DataFrame():
     Returns:
         pandas.DataFrame
     """
-    # Write your logic here
-
+    # Assuming you have a 'timestamp' column in df
+    df['hour'] = df['timestamp'].dt.hour
+    time_based_toll_rates = df.groupby('hour')['distance'].mean() * 0.2  # Adjust the toll rate calculation as needed
+    df['time_based_toll_rate'] = df['hour'].map(time_based_toll_rates)
     return df
+
+
